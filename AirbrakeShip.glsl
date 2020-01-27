@@ -6,7 +6,7 @@
 // This is the starting point for a YouTube tutorial:
 // https://youtu.be/Vmb7VGBVZJA
 
-#define MAX_STEPS 100
+#define MAX_STEPS 1000
 #define MAX_DIST 100.
 #define SURF_DIST .001
 
@@ -116,7 +116,6 @@ vec3 R(vec2 uv, vec3 p, vec3 l, float z) {
        d = normalize(i - p);
   return d;
 }
-
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
   vec2 uv = (fragCoord - .5 * iResolution.xy) / iResolution.y;
   vec2 m = iMouse.xy / iResolution.xy;
