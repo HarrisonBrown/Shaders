@@ -13,8 +13,7 @@ float sdBox(vec3 p, vec3 s) {
 }
 
 vec4 GetDist(vec3 p) {
-  vec4 box = vec4(FLOOR_COLOUR, sdBox(p - vec3(0, 1, 0), vec3(1,1,2)));
-
+  vec4 box = vec4(FLOOR_COLOUR, sdBox(p, vec3(1.5,1,5)));
   return box;
 }
 
@@ -41,7 +40,7 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 
   vec3 col = SKY_COLOUR;
 
-  vec3 ro = vec3(0, 3, -2);
+  vec3 ro = vec3(0, 2, -4);
   vec3 rd = normalize(vec3(uv.x, uv.y, 1));
   vec4 d = RayMarch(ro, rd);
 
@@ -51,10 +50,11 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
   }
 
   // Sun
-  col += .05/length(uv - vec2(0,.25));
+  col += .05/length(uv - vec2(0,.125));
 
   // Construction grid
-  vec2 gv = fract(uv*6.);
+  vec2 gv = fract(uv*12.);
+  //if (gv.x > .98 || gv.y>.98) col = vec3(1);
 
   //col.rg = gv; 
   fragColor = vec4(col, 0.0);
