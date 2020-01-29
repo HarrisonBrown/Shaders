@@ -1,5 +1,5 @@
 ## Rolling Cube
 
 A rolling cube, shockwaves emerge in a square around the base of the cube after each 'roll'.
-Rolls in direction of mouse
+Rolls in direction of mouse - Probably can't do smoothly
 Inspired by the cover art for 'Something I Always Do' by Canti
