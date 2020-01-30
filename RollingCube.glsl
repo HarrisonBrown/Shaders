@@ -1,5 +1,5 @@
 #define MAX_STEPS 10000
-#define MAX_DIST 100.
+#define MAX_DIST 1000.
 #define SURF_DIST .001
 
 #define PI 3.1415926535897932384626433832795
@@ -7,6 +7,8 @@
 
 #define CUBE_COLOUR vec3(.8, .843, .922)
 #define PLANE_COLOUR vec3(.635, .761, .851)
+
+//#define MOUSE_MOVEMENT
 
 mat2 Rot(float a) {
   float s = sin(a);
@@ -146,15 +148,17 @@ vec3 R(vec2 uv, vec3 p, vec3 l, float z) {
 
 void mainImage(out vec4 fragColor, in vec2 fragCoord) {
   vec2 uv = (fragCoord - .5 * iResolution.xy) / iResolution.y;
-  vec2 m = iMouse.xy / iResolution.xy;
-
   vec3 col = vec3(0);
 
-  vec3 ro = vec3(0, 4, -5);
-  ro.yz *= Rot(-m.y * 3.14 + 1.);
-  ro.xz *= Rot(-m.x * 6.2831);
+  vec3 ro = vec3(40); // Camera pos
+  
+  #ifdef MOUSE_MOVEMENT
+    vec2 m = iMouse.xy / iResolution.xy;
+    ro.yz *= Rot(-m.y * 3.14 + 1.);
+    ro.xz *= Rot(-m.x * 6.2831);
+  #endif
 
-  vec3 rd = R(uv, ro, vec3(0, 1, 0), 1.);
+  vec3 rd = R(uv, ro, vec3(0, 1, 0), 5.); // Camera direction/zoom
 
   vec4 cube = RayMarchCube(ro, rd);
   vec4 plane = RayMarchPlane(ro, rd);
@@ -164,8 +168,8 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
   
     vec3 cube_p = ro + rd * cube.w;
     float dif = DiffuseLight(cube_p);
-    col.yz *= dif;
-    col.x *= dif/.9;
+    col.yz *= dif/.2;
+    col.x *= dif/.5;
 
     if (plane.w < cube.w)
     {      
