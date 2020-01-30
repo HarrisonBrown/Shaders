@@ -5,8 +5,8 @@
 #define PI 3.1415926535897932384626433832795
 #define ROLLSPEED iTime
 
-#define CUBE_COLOUR vec3(.5, .933, .969)
-#define PLANE_COLOUR vec3(.8, .843, .922)
+#define CUBE_COLOUR vec3(.8, .843, .922)
+#define PLANE_COLOUR vec3(.635, .761, .851)
 
 mat2 Rot(float a) {
   float s = sin(a);
@@ -46,6 +46,8 @@ vec4 GetCubeDist(vec3 p)
 
   return vec4(CUBE_COLOUR, sdBox(rotatedCubePos - vec3(0, 1, 0), vec3(1)));
 }
+
+// Can remove
 vec4 GetDist(vec3 p) {
   //Floor
   vec4 plane = vec4(PLANE_COLOUR, p.y);
@@ -56,16 +58,33 @@ vec4 GetDist(vec3 p) {
   return plane.w < box.w ? plane : box;
 }
 
-vec4 RayMarch(vec3 ro, vec3 rd) {
+vec4 RayMarchCube(vec3 ro, vec3 rd) {
   float dO = 0.;
   vec3 col = vec3(0);
 
   for (int i = 0; i < MAX_STEPS; i++) {
     vec3 p = ro + rd * dO;
-    float dS = GetDist(p).w;
+    float dS = GetCubeDist(p).w;
     dO += dS;
     if (dO > MAX_DIST || dS < SURF_DIST) {
-      col = GetDist(p).xyz;
+      col = GetCubeDist(p).xyz;
+      break;
+    }
+  }
+
+  return vec4(col, dO);
+}
+
+vec4 RayMarchPlane(vec3 ro, vec3 rd) {
+  float dO = 0.;
+  vec3 col = vec3(0);
+
+  for (int i = 0; i < MAX_STEPS; i++) {
+    vec3 p = ro + rd * dO;
+    float dS = p.y;
+    dO += dS;
+    if (dO > MAX_DIST || dS < SURF_DIST) {
+      col = PLANE_COLOUR;
       break;
     }
   }
@@ -96,7 +115,7 @@ float Shadow(vec3 p) {
   float dif = 1.;
 
   // Shadow
-  float d2 = RayMarch(p + n * SURF_DIST * 2., l).w;
+  float d2 = RayMarchCube(p + n * SURF_DIST * 2., l).w;
   if(p.y<.01 && d2<length(lightPos-p)) dif *= .5;
 
   return dif;
@@ -110,14 +129,13 @@ float DiffuseLight(vec3 p){
   float d = GetDist(p).w;
   vec2 e = vec2(.001, 0);
 
-  vec3 n = d - vec3(GetCubeDist(p - e.xyy).w, GetCubeDist(p - e.yxy).w, GetCubeDist(p - e.yyx).w);
+  vec3 n = d - vec3(GetDist(p - e.xyy).w, GetDist(p - e.yxy).w, GetDist(p - e.yyx).w);
   n = normalize(n);
 
   float dif = clamp(dot(n, l) * .5 + .5, 0., 1.);
 
   return dif;
 }
-
 
 vec3 R(vec2 uv, vec3 p, vec3 l, float z) {
   vec3 f = normalize(l - p), r = normalize(cross(vec3(0, 1, 0), f)),
@@ -138,15 +156,24 @@ void mainImage(out vec4 fragColor, in vec2 fragCoord) {
 
   vec3 rd = R(uv, ro, vec3(0, 1, 0), 1.);
 
-  vec4 d = RayMarch(ro, rd);
+  vec4 cube = RayMarchCube(ro, rd);
+  vec4 plane = RayMarchPlane(ro, rd);
 
-  if (d.w < MAX_DIST) {
-    col = d.xyz;
+  if (cube.w < MAX_DIST || plane.w < MAX_DIST) {
+    col = cube.xyz;
+  
+    vec3 cube_p = ro + rd * cube.w;
+    float dif = DiffuseLight(cube_p);
+    col.yz *= dif;
+    col.x *= dif/.9;
 
-    vec3 p = ro + rd * d.w;
-    float dif = DiffuseLight(p);
-    col.xyz *= dif;
-    col.yz *= Shadow(p);
+    if (plane.w < cube.w)
+    {      
+      vec3 plane_p = ro + rd * plane.w;
+      col.xyz = plane.xyz;
+      col.yz *= Shadow(plane_p);
+    }
+
   }
 
   fragColor = vec4(col, 0.0);
