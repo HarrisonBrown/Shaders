@@ -3,3 +3,7 @@
 A rolling cube, shockwaves emerge in a square around the base of the cube after each 'roll'.
 Rolls in direction of mouse - Probably can't do smoothly
 Inspired by the cover art for 'Something I Always Do' by Canti
+
+## Hillside twilight
+
+Recreate the view from the chilterns after sunset, when the towns' lights are flickering and the sky is that rich dark blue
