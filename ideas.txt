@@ -1,3 +1,7 @@
+## Album Art Inspirations
+SCNTST - Self Therapy
+
+
 ## Rolling Cube
 
 A rolling cube, shockwaves emerge in a square around the base of the cube after each 'roll'.
